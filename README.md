@@ -4,9 +4,9 @@
 > (2분 간격 cron)가 현재 cloudflare quick-tunnel URL로 갱신합니다.
 > 사람이 직접 편집하지 마세요 — 다음 실행 때 덮어씁니다.
 
-- **현재 접속 URL**: https://fake-test-url.trycloudflare.com
-- **로그인**: https://fake-test-url.trycloudflare.com/signin/
-- 상태: 비정상 (HTTP 000000 — 확인 필요)
+- **현재 접속 URL**: https://chargers-stable-diverse-durham.trycloudflare.com
+- **로그인**: https://chargers-stable-diverse-durham.trycloudflare.com/signin/
+- 상태: 정상
 - 마지막 확인: 2026-10-14 19:11 KST
 
 ## 참고
