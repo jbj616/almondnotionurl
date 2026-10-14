@@ -38,6 +38,16 @@ fi
 
 NOW="$(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M %Z')"
 
+# 4. URL·상태가 기존 README와 같으면 갱신 안 함
+# (URL 변경 때만 commit — 매 실행 타임스탬프만으로 커밋하지 않음)
+if [ -f "$README" ]; then
+  OLD_URL="$(grep -m1 '^\- \*\*현재 접속 URL\*\*:' "$README" 2>/dev/null | sed 's/^.*: //')"
+  OLD_STATUS="$(grep -m1 '^\- 상태:' "$README" 2>/dev/null | sed 's/^\- 상태: //')"
+  if [ "$OLD_URL" = "$HOST_URL" ] && [ "$OLD_STATUS" = "$PUBLIC_STATUS" ]; then
+    exit 0
+  fi
+fi
+
 NEW_README="# almondnotion 접속 URL
 
 > 자동 업데이트: 이 파일은 almondnotion 서버의 \`update-url.sh\`
@@ -56,11 +66,6 @@ NEW_README="# almondnotion 접속 URL
 - 서버 로컬에서는 항상 \`http://localhost:8080/signin/\` 으로 접속됩니다.
 - \`/\` 루트는 GUI가 아니라 \`OK\` 헬스 응답이 정상입니다.
 "
-
-# 4. 변경 없으면 종료
-if [ -f "$README" ] && [ "$(cat "$README" 2>/dev/null)" = "$NEW_README" ]; then
-  exit 0
-fi
 
 printf '%s' "$NEW_README" > "$README"
 cd "$REPO_DIR" || exit 1
