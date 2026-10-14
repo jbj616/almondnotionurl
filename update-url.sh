@@ -22,14 +22,16 @@ if [ -z "$HOST_URL" ]; then
 fi
 
 # 2. origin 살아있는지 확인 (죽었으면 갱신 안 함)
-ORIGIN_CODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$ORIGIN_SIGNIN" 2>/dev/null || echo 000)"
+ORIGIN_CODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$ORIGIN_SIGNIN" 2>/dev/null)"
+[ -z "$ORIGIN_CODE" ] && ORIGIN_CODE="000"
 if [ "$ORIGIN_CODE" != "200" ]; then
   log "SKIP: origin :8080 응답 이상 (HTTP $ORIGIN_CODE)"
   exit 1
 fi
 
 # 3. 공개 URL 실측 (참고용으로 기록, 실패해도 갱신은 진행)
-PUBLIC_CODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$HOST_URL/signin/" 2>/dev/null || echo 000)"
+PUBLIC_CODE="$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$HOST_URL/signin/" 2>/dev/null)"
+[ -z "$PUBLIC_CODE" ] && PUBLIC_CODE="000"
 if [ "$PUBLIC_CODE" = "200" ]; then
   PUBLIC_STATUS="정상"
 else
