@@ -4,6 +4,9 @@
 #   */2 * * * * flock -n /tmp/almondnotionurl.lock /home/almond/Desktop/code/almondnotionurl/update-url.sh >> /tmp/almondnotionurl.log 2>&1
 set -u
 export PATH="/usr/bin:/bin"
+# cron(비세션) 환경에서 gh credential helper(keyring)가 세션 버스를 찾도록 보정
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=$XDG_RUNTIME_DIR/bus}"
 
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 METRICS_URL="${METRICS_URL:-http://127.0.0.1:20241/metrics}"
@@ -39,18 +42,28 @@ else
 fi
 
 NOW="$(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M %Z')"
+cd "$REPO_DIR" || exit 1
 
-# 4. URL·상태가 기존 README와 같으면 갱신 안 함
-# (URL 변경 때만 commit — 매 실행 타임스탬프만으로 커밋하지 않음)
+# 원격 최신화. 사람이 README를 직접 편집해 diverge된 경우 rebase로 처리
+# (-X theirs: 로컬(bot) README가 이김). cron에서 실행되므로 반드시 cd 후 git 실행.
+if ! git pull --ff-only -q 2>/dev/null; then
+  git pull --rebase -X theirs origin main 2>/dev/null || true
+fi
+
+# 4. URL·상태가 기존 README와 같으면 갱신하지 않음
+# (push 실패로 밀린 커밋은 아래에서 URL과 무관하게 push 재시도됨)
+NEED_UPDATE=1
 if [ -f "$README" ]; then
   OLD_URL="$(grep -m1 '^\- \*\*현재 접속 URL\*\*:' "$README" 2>/dev/null | sed 's/^.*: //')"
   OLD_STATUS="$(grep -m1 '^\- 상태:' "$README" 2>/dev/null | sed 's/^\- 상태: //')"
   if [ "$OLD_URL" = "$HOST_URL" ] && [ "$OLD_STATUS" = "$PUBLIC_STATUS" ]; then
-    exit 0
+    NEED_UPDATE=0
   fi
 fi
 
-NEW_README="# almondnotion 접속 URL
+if [ "$NEED_UPDATE" -eq 1 ]; then
+  cat > README.md <<EOF
+# almondnotion 접속 URL
 
 > 자동 업데이트: 이 파일은 almondnotion 서버의 \`update-url.sh\`
 > (2분 간격 cron)가 현재 cloudflare quick-tunnel URL로 갱신합니다.
@@ -67,20 +80,20 @@ NEW_README="# almondnotion 접속 URL
   북마크가 안 되면 이 파일을 다시 확인하세요.
 - 서버 로컬에서는 항상 \`http://localhost:8080/signin/\` 으로 접속됩니다.
 - \`/\` 루트는 GUI가 아니라 \`OK\` 헬스 응답이 정상입니다.
-"
+EOF
+  git add README.md
+  if ! git diff --cached --quiet; then
+    git commit -qm "url: $HOST_URL ($NOW)" || exit 1
+  fi
+fi
 
-printf '%s' "$NEW_README" > "$README"
-cd "$REPO_DIR" || exit 1
-git pull --ff-only -q 2>/dev/null || true
-git add README.md
-if git diff --cached --quiet; then
-  log "OK: $HOST_URL (변경 없음)"
-  exit 0
+# push 실패로 밀린 커밋 재시도 (URL이 바뀌지 않아도 계속)
+if [ -n "$(git rev-list origin/main..HEAD 2>/dev/null)" ]; then
+  if git push -q origin main 2>&1; then
+    log "PUSH: $HOST_URL (public $PUBLIC_CODE)"
+  else
+    log "FAIL: push 실패 ($HOST_URL)"
+    exit 1
+  fi
 fi
-git commit -qm "url: $HOST_URL ($NOW)" || exit 1
-if git push -q origin main 2>&1; then
-  log "PUSH: $HOST_URL (public $PUBLIC_CODE)"
-else
-  log "FAIL: push 실패 ($HOST_URL)"
-  exit 1
-fi
+exit 0
