@@ -6,8 +6,8 @@
 
 - **현재 접속 URL**: https://vessel-andale-reserved-lines.trycloudflare.com
 - **로그인**: https://vessel-andale-reserved-lines.trycloudflare.com/signin/
-- 상태: 정상
-- 마지막 확인: 2026-10-30 15:14 KST
+- 상태: 비정상 (HTTP 000 — 확인 필요)
+- 마지막 확인: 2026-10-30 15:54 KST
 
 ## 참고
 
