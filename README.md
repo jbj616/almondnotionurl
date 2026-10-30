@@ -4,10 +4,10 @@
 > (2분 간격 cron)가 현재 cloudflare quick-tunnel URL로 갱신합니다.
 > 사람이 직접 편집하지 마세요 — 다음 실행 때 덮어씁니다.
 
-- **현재 접속 URL**: https://clone-paradise-commonly-stood.trycloudflare.com
-- **로그인**: https://clone-paradise-commonly-stood.trycloudflare.com/signin/
-- 상태: 비정상 (HTTP 000 — 확인 필요)
-- 마지막 확인: 2026-10-30 20:22 KST
+- **현재 접속 URL**: https://remaining-integral-jan-machines.trycloudflare.com
+- **로그인**: https://remaining-integral-jan-machines.trycloudflare.com/signin/
+- 상태: 정상
+- 마지막 확인: 2026-10-30 20:41 KST
 
 ## 참고
 
