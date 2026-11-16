@@ -6,8 +6,8 @@
 
 - **현재 접속 URL**: https://remaining-integral-jan-machines.trycloudflare.com
 - **로그인**: https://remaining-integral-jan-machines.trycloudflare.com/signin/
-- 상태: 비정상 (HTTP 530 — 확인 필요)
-- 마지막 확인: 2026-11-16 19:32 KST
+- 상태: 정상
+- 마지막 확인: 2026-11-16 19:34 KST
 
 ## 참고
 
